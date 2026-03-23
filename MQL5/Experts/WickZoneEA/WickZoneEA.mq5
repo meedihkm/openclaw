@@ -6,7 +6,7 @@
 //|  1. Scan candles across multiple timeframes                      |
 //|  2. Store candles with dominant wicks (wick > 50% of range)      |
 //|  3. Filter: only keep candles near OB, FVG, or P/D zones        |
-//|  4. Entry when price returns to the wick trigger level           |
+//|  4. Place limit orders under/above wicks                         |
 //|  5. SL under the zone, no fixed TP                               |
 //|  6. BE + Trailing Stop manage exits                              |
 //+------------------------------------------------------------------+
@@ -62,6 +62,8 @@ input int    InpMagic                  = 778899;        // Magic Number
 input int    InpMaxPositions           = 3;             // Max open positions
 input double InpDefaultLots            = 0.01;          // Default lot size (fallback)
 input int    InpSlippage               = 10;            // Slippage (points)
+input double InpLimitOffset           = 5.0;           // Limit order offset from wick (points)
+input int    InpLimitExpiryHours      = 48;            // Limit order expiry (hours)
 
 //+------------------------------------------------------------------+
 //| Global Module Instances                                          |
@@ -108,7 +110,8 @@ int OnInit()
 
    //--- Initialize Trade Manager
    g_tradeManager.Init(&g_wickFilter, &g_zoneDetector, &g_riskManager,
-                        InpDefaultLots, InpMagic, InpMaxPositions, InpSlippage);
+                        InpDefaultLots, InpMagic, InpMaxPositions, InpSlippage,
+                        InpLimitOffset, InpLimitExpiryHours);
 
    LogInfo("WickZone EA initialized successfully");
    LogInfo("Timeframes: " + IntegerToString(tfCount) +
@@ -168,8 +171,9 @@ void OnTick()
       g_wickFilter.PurgeTriggered();
    }
 
-   //--- Every tick: evaluate entries and manage positions
-   g_tradeManager.EvaluateEntries(_Symbol);
+   //--- Every tick: place limit orders and manage positions
+   g_tradeManager.PlaceLimitOrders(_Symbol);
+   g_tradeManager.ManagePendingOrders(_Symbol);
    g_riskManager.ManageOpenPositions(_Symbol, InpMagic);
 }
 

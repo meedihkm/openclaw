@@ -62,7 +62,9 @@ struct WickCandle
    ZoneInfo          zone;
    bool              hasZone;
    ENUM_ENTRY_STATE  state;
-   double            wickTriggerPrice;  // price level where entry triggers
+   double            wickTriggerPrice;  // price level where limit order is placed
+   double            limitPrice;        // actual limit order price (under/above wick)
+   ulong             orderTicket;       // pending order ticket (0 = not yet placed)
    datetime          expiryTime;
 };
 

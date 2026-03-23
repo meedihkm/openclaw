@@ -136,6 +136,8 @@ void CWickFilter::ScanTimeframe(string symbol, ENUM_TIMEFRAMES tf)
       wc.candle = cd;
       wc.hasZone = false;
       wc.state   = ENTRY_PENDING;
+      wc.orderTicket = 0;
+      wc.limitPrice  = 0;
 
       // Trigger price is at the tip of the dominant wick
       // For bullish wick candle (long lower wick) -> trigger = lower wick area
